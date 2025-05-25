@@ -1,0 +1,58 @@
+
+name: DevSecOps Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  rkhunter:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Install rkhunter
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y rkhunter
+      - name: Run rkhunter
+        run: sudo bash scripts/rkhunter_notify.sh
+
+  clamav:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Install ClamAV
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clamav
+          sudo freshclam
+      - name: Run ClamAV scan
+        run: sudo bash scripts/clamav_scan.sh
+
+  lynis:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Install Lynis
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y lynis
+      - name: Run Lynis audit
+        run: sudo bash scripts/lynis_audit.sh
+
+  trivy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Install Trivy
+        run: |
+          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sudo sh -s -- -b /usr/local/bin
+      - name: Run Trivy scan
+        run: sudo bash scripts/trivy_scan.sh
+
